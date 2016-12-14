@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="normalize.css"/>
+    <link rel="stylesheet" href="style.css"/>
+    <script src="https://unpkg.com/react@15.2.1/dist/react.js"></script>
+    <!-- The ReactDOM Library -->
+    <script src="https://unpkg.com/react-dom@15.2.1/dist/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.js"></script>
+    <title>Note Board</title>
+  </head>
+  <body>
+    <div id="react-container">
+
+    </div>
+    <script type="text/babel">
+        var Note = React.createClass({
+          getInitialState(){
+            return {editing: false}
+          },
+
+          save(){
+            this.props.onChange(this.refs.newText.value, this.props.id)
+            this.setState({editing: false})
+          },
+
+          edit(){
+            this.setState({editing: true})
+          },
+          remove(){
+            this.props.onRemove(this.props.id)
+          },
+
+          renderForm(){
+            return(
+              <div className="form">
+                <textarea ref="newText"></textarea>
+                <button onClick={this.save}>Guardar</button>
+              </div>
+            )
+          },
+
+          renderDisplay(){
+            return(<div className="display">
+              <p>{this.props.children}</p>
+              <span>
+                <button onClick={this.edit}>Editar</button>
+                <button onClick={this.remove}>Eliminar</button>
+              </span>
+            </div>)
+          },
+
+          render(){
+            return (this.state.editing) ? this.renderForm()
+                                        : this.renderDisplay()
+          }
+        })
+
+
+        var Board = React.createClass({
+
+            propTypes: {
+              count: function(props, propName){
+                if(typeof props[propName] != "number"){
+                  return new Error("Count debe ser un numero")
+                }
+                if(props[propName] > 100){
+                  return new Error("Count no debe ser mayor de 100")
+                }
+              }
+            },
+
+            getInitialState(){
+              return {
+                notes: [
+                  {id: 0, note: "Llama a"},
+                  {id: 1, note: "Envia Proyecto"},
+                  {id: 2, note: "Termina Maestria"},
+                  {id: 3, note: "Termina el blog"}
+                ]
+              }
+            },
+
+            update(newText, id){
+              var notes = this.state.notes.map(
+                note => (note.id !== id)?
+                  note: {
+                    ...note,
+                    note: newText
+                  }
+              )
+              this.setState({notes})
+            },
+
+            remove(id){
+              var notes = this.state.notes.filter(note => note.id !== id)
+              this.setState({notes})
+            },
+
+            eachNote(note){
+              return (<Note key={note.id}
+                            id={note.id}
+                            onChange={this.update}
+                            onRemove={this.Remove}>
+                            {note.note}
+                      </Note>)
+            },
+
+
+            render(){
+              return(<div className="board">
+                      {this.state.notes.map(this.eachNote)}
+                    </div>)
+            }
+        })
+
+        ReactDOM.render(<Board count={10}/>, document.getElementById("react-container"))
+    </script>
+  </body>
+</html>
